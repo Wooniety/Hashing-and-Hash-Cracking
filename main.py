@@ -1,5 +1,9 @@
-# Import library to hash.
+# Import libraries
 import hashlib
+import re
+# Minor stuff
+from utils import *
+
 
 def pick_option(question, *options):
     """General Menu"""
@@ -9,9 +13,10 @@ def pick_option(question, *options):
     for i, option in enumerate(options):
         option_dict[str(i+1)] = option
         print(f"{i+1}) {option}")
-    choose = input("").strip()
+    choose = input(">> ").strip()
     while choose not in option_dict.keys():
-        choose = input("").strip()
+        print("Invalid option!")
+        choose = input(">> ").strip()
     return option_dict[choose]
 
 def hashing(option, string):
@@ -26,42 +31,35 @@ def hashing(option, string):
     
     return hash_dict[option]
 
-print(pick_option("What kind of hashing?", "md5", "sha1", "sha224", "sha256", "sha384", "sha512"))
-
-def clear(): 
-    """Clear Screen. Works for both Windows and Bash"""
-    # Windows 
-    if name == 'nt': 
-        _ = system('cls') 
-    # Bash
-    else: 
-        _ = system('clear') 
-
-def enter_to_continue():
-    """Usually to stop the screen from clearing"""
-    input("\nPress Enter to continue... "
-
 # Main Loop
 while True:
+    clear()
     choose = pick_option("Do you want to hash or crack?", "Hash", "Crack")
     if choose == 0:
         print("Bye!")
         break
     elif choose == "Hash":
+        clear()
         choose_hash = pick_option("What kind of hashing?", "md5", "sha1", "sha224", "sha256", "sha384", "sha512")
         to_hash = input("Enter string to hash: ")
-        print(f"{to_hash} in {choose_hash} = {hashing(choose_hash, to_hash)}") 
+        print(f"\033[1;33;40m{to_hash}\033[0;37;40m in \033[1;33;40m{choose_hash}\033[0;37;40m = {hashing(choose_hash, to_hash)}") 
     elif choose == "Crack":
-        password_file = input("Enter name of password list e.g \"password.txt\"").strip()
+        hash_input = pick_option("Enter hash or read from file?", "Enter hash", "Read from file")
+        if hash_input == "Enter hash":
+            hash_input = [input("Enter hash: ").strip()]
+        else:
+            hash_filename = input("Enter name of password list e.g \"password.txt\"\nFormat is seperated by newline\nFilename: ").strip()
+            hash_file = open(hash_filename, "r")
+            hash_input = hash_file.read().split('\n')
+            hash_file.close()
+        hash_type = pick_option("Enter name of hash", "md5", "sha1", "sha224", "sha256", "sha384", "sha512")
+        hashed_file = open(f"dictionary/{hash_type}.csv", "r")
+        stored_hashes = hashed_file.read().split('\n')
+        for i, line in enumerate(stored_hashes):
+            stored_hashes[i] = line.split(',')
+        for hashed_string in hash_input:
+            for word in stored_hashes:
+                if word[1] == hashed_string:
+                    print(f"Match found!\n{hashed_string} = {word[0]}")
+                    break
     enter_to_continue()
-
-
-# Hash
-# Pick a hash
-## 
-# Input plaintext
-# Output hashed text
-## Optional: Append hashed item to file
-
-# Crack Hash
-# Enter hash (Optional: Read from file)
